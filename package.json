@@ -1,0 +1,21 @@
+{
+  "name": "advent-of-code-2018-nodejs",
+  "version": "1.0.0",
+  "description": "nodejs solutions for Advent of Code 2018",
+  "main": "index.js",
+  "author": "Spenser Andreassen <spenserca@gmail.com>",
+  "license": "UNLICENSED",
+  "private": false,
+  "devDependencies": {
+    "eslint": "^5.9.0",
+    "eslint-config-get-off-my-lawn": "^4.0.1",
+    "jest": "^23.6.0"
+  },
+  "scripts": {
+    "lint": "eslint --color -c ./config/.eslintrc.js **/*.js",
+    "lint:file": "eslint --color -c ./config/.eslintrc.js",
+    "test": "jest --config ./config/jest.config.js",
+    "verify": "yarn lint && yarn test"
+  },
+  "dependencies": {}
+}
