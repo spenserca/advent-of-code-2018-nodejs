@@ -15,64 +15,29 @@ const buildGrid = () => {
 module.exports = (input) => {
   const grid = buildGrid();
 
-  const rectangles = input.split('\r\n')
-    .filter((i) => i)
+  return input.split('\r\n')
+    .filter((claim) => claim)
     .map((claim) => {
       const splitClaim = claim.split(' ');
       const coordinates = splitClaim[2].replace(':', '').split(',');
       const dimensions = splitClaim[3].split('x');
 
       return {
-        x: coordinates[1],
-        y: coordinates[0],
-        width: dimensions[0],
-        length: dimensions[1]
+        x: parseInt(coordinates[0]),
+        y: parseInt(coordinates[1]),
+        w: parseInt(dimensions[0]),
+        h: parseInt(dimensions[1])
       };
     })
-    .map((rectangle) => {
-      console.log(`Processing rectangle: ${JSON.stringify(rectangle)}`);
-
-      for (let i = rectangle.x + 1; i < rectangle.length; i++) {
-        console.log(`x: ${rectangle.x}. length: ${rectangle.length}`);
-
-        let row = grid[i];
-        console.log(JSON.stringify(row));
+    .reduce((accumulator, rectangle) => {
+      for (let i = 0; i < rectangle.w; i++) {
+        for (let k = 0; k < rectangle.h; k++) {
+          if (++grid[rectangle.x + i][rectangle.y + k] == 2) {
+            accumulator++;
+          }
+        }
       }
-    });
 
-
-
-  // .map((rectangle) => {
-  //   for (let x = rectangle.x + 1; x <= rectangle.x + rectangle.length + 1; x++) {
-  //     let row = grid[x];
-  //     // console.log(JSON.stringify(row));
-
-  //     for (let y = rectangle.y + 1; y <= rectangle.y + rectangle.length + 1; y++) {
-  //       // console.log(row[y]);
-  //       row[y]++;
-  //     }
-  //   }
-  // });
-
-  // rectangles.forEach((rectangle) => {
-  //   for (let x = rectangle.x + 1; x <= rectangle.x + rectangle.length + 1; x++) {
-  //     let row = grid[x];
-  //     console.log(JSON.stringify(row));
-
-  //     for (let y = rectangle.y + 1; y <= rectangle.y + rectangle.length + 1; y++) {
-  //       console.log(row[y]);
-  //       row[y]++;
-  //     }
-  //   }
-  // });
-
-  return grid.reduce((accumulator, row) => {
-    accumulator += row.reduce((accumulator, y) => {
-      return y >= 2
-        ? accumulator += y
-        : accumulator;
+      return accumulator;
     }, 0);
-
-    return accumulator;
-  }, 0);
 };
