@@ -18,13 +18,16 @@ const parseRecords = (recordString) => {
 const byDateAsc = (recordOne, recordTwo) =>
   recordOne.timestamp - recordTwo.timestamp;
 
+const isGuardChange = (record) =>
+  record.guardId;
+
 const setStateForMinute = (status) =>
   status === 'wakes up'
-    ? '.'
-    : '#';
+    ? 0
+    : 1;
 
-const initialHour = () =>
-  Array.apply('.', 60);
+const initializeHour = () =>
+  new Array(60).fill(0, 0, 60);
 
 module.exports = (input) => {
   let schedule = [];
@@ -38,17 +41,19 @@ module.exports = (input) => {
       const guard = schedule.find((s) => s.guardId === record.guardId);
 
       // is a guard record
-      if (!guard && record.guardId) {
+      if (!guard && isGuardChange(record)) {
         schedule.push({
+          miuntes: initializeHour(),
           guardId: record.guardId
         });
       }
       // is a status change
       else {
+        // for the guard set an initialHour with awake values
+        // increment the index each time he sleeps to get the 
+        // minute that he is asleep the most
 
       }
-
-
 
       return schedule;
     }, []);
