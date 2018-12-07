@@ -26,7 +26,6 @@ const initializeHour = () =>
 
 module.exports = (input) => {
   let currentGuard = 0;
-  let solutionId = 0;
 
   const schedule = input.split('\r\n')
     .filter(removeEmpty)
