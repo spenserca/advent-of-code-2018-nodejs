@@ -33,8 +33,6 @@ module.exports = (input) => {
     .map(parseRecords)
     .sort(byDateAsc)
     .reduce((schedule, record, index, records) => {
-      console.log(JSON.stringify(record));
-
       if (isGuardChange(record)) {
         currentGuard = record.guardId;
       } else if (record.status.includes('asleep')) {
@@ -50,50 +48,32 @@ module.exports = (input) => {
         }
       }
 
-      // // is a guard record
-      // if (!schedule.has(record.guardId) && isGuardChange(record)) {
-      //   schedule.set(record.guardId, initializeHour());
-      //   // schedule[record.guardId] = initializeHour();
-      //   currentGuard.id = record.guardId;
-      // }
-      // // is a status change
-      // else {
-      //   // for the guard set an initialHour with awake values
-      //   // increment the index each time he sleeps to get the 
-      //   // minute that he is asleep the most
-      //   if (record.status === 'falls asleep') {
-      //     const nextRecord = records[index + 1];
-      //     const existingGuard = schedule.get(currentGuard.id);
-      //     for (let i = record.minute; i < nextRecord.minute; i++) {
-      //       existingGuard[i]++;
-      //     }
-      //     schedule.set(currentGuard.id, existingGuard);
-      //   }
-      // }
-
       return schedule;
     }, {});
 
-  let total = 0,
-    max = 0,
-    maxMinute,
-    solutionGuard;
+  let currentTotal = 0;
 
-  Object.keys(schedule)
-    .forEach((guardId) => {
-      const currentTotal = schedule[guardId]
+  return Object.keys(schedule)
+    .map((key) => {
+      const sleepingMinuteTotal = schedule[key]
         .reduce((acc, curr) => {
           return acc += curr;
-        }, 0);
-      const currentMax = Math.max(...schedule[guardId]);
+        }, 1);
+      const sleepingMinuteMax = Math.max(...schedule[key]);
+      const maxSleepingMinuteIndex = schedule[key].indexOf(sleepingMinuteMax) + 1;
 
-      if (currentTotal > total) {
-        max = currentMax;
-        maxMinute = schedule[guardId].indexOf(currentMax);
-        solutionGuard = parseInt(guardId);
+      return {
+        id: key,
+        maxIndex: maxSleepingMinuteIndex,
+        total: sleepingMinuteTotal
+      };
+    })
+    .reduce((acc, curr) => {
+      if (curr.total > currentTotal) {
+        currentTotal = curr.total;
+        acc = curr.maxIndex * curr.id;
       }
-    });
 
-  return solutionGuard;
-  // return maxMinute;
+      return acc;
+    }, 0);
 };
