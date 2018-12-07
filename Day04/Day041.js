@@ -22,14 +22,13 @@ const isGuardChange = (record) =>
   record.guardId;
 
 const initializeHour = () =>
-  new Array(60).fill(0, 0, 59);
+  new Array(59).fill(0, 0, 59);
 
 module.exports = (input) => {
-  let schedule = [];
   let currentGuard = 0;
   let solutionId = 0;
 
-  return input.split('\r\n')
+  const schedule = input.split('\r\n')
     .filter(removeEmpty)
     .map(parseRecords)
     .sort(byDateAsc)
@@ -40,18 +39,13 @@ module.exports = (input) => {
         currentGuard = record.guardId;
       } else if (record.status.includes('asleep')) {
         const nextRecord = records[index + 1];
-        let endMinute;
-        if (nextRecord) {
-          endMinute = nextRecord.minute;
-        }
+        const endMinute = nextRecord && nextRecord.minute;
 
         for (let i = record.minute; i < endMinute; i++) {
-          if (schedule.has(currentGuard)) {
-            const minutes = schedule.get(currentGuard);
-            minutes[i]++;
-            schedule.set(currentGuard, minutes);
+          if (schedule[currentGuard]) {
+            schedule[currentGuard][i]++;
           } else {
-            schedule.set(currentGuard, initializeHour());
+            schedule[currentGuard] = initializeHour();
           }
         }
       }
@@ -78,5 +72,28 @@ module.exports = (input) => {
       // }
 
       return schedule;
-    }, new Map());
+    }, {});
+
+  let total = 0,
+    max = 0,
+    maxMinute,
+    solutionGuard;
+
+  Object.keys(schedule)
+    .forEach((guardId) => {
+      const currentTotal = schedule[guardId]
+        .reduce((acc, curr) => {
+          return acc += curr;
+        }, 0);
+      const currentMax = Math.max(...schedule[guardId]);
+
+      if (currentTotal > total) {
+        max = currentMax;
+        maxMinute = schedule[guardId].indexOf(currentMax);
+        solutionGuard = parseInt(guardId);
+      }
+    });
+
+  return solutionGuard;
+  // return maxMinute;
 };
