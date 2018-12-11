@@ -69,11 +69,51 @@ module.exports = (input) => {
         }
       });
 
-      return closestCoordinates.length === 1 ? closestCoordinates[0].id : '#';
+      if (closestCoordinates.length === 0) {
+        return value;
+      }
+
+      if (closestCoordinates.length === 1) {
+        return closestCoordinates[0].id;
+      }
+
+      return '#';
     });
 
     grid[key] = updatedRow;
-  })
+  });
 
-  return JSON.stringify(grid);
-}
+  const values = Object.keys(grid)
+    .reduce((accumulator, key) => {
+      const row = grid[key];
+
+      const rowValues = row.reduce((accumulator, value) => {
+        if (value === '#') {
+          return accumulator;
+        }
+
+        if (accumulator[value]) {
+          accumulator[value]++;
+        } else {
+          accumulator[value] = 1;
+        }
+
+        return accumulator;
+      }, {});
+
+      Object.keys(rowValues)
+        .forEach((key) => {
+          if (accumulator[key]) {
+            accumulator[key] += rowValues[key];
+          } else {
+            accumulator[key] = rowValues[key];
+          }
+        });
+
+      return accumulator;
+    }, {})
+
+  return Math.max(...Object.values(values));
+};
+
+// That's not the right answer; your answer is too high. If you're stuck, there are some general tips on the about page, or you can ask for hints on the subreddit. Please wait one minute before trying again. (You guessed 12568.) 
