@@ -1,3 +1,19 @@
+const initializeGrid = (minX, maxX, minY, maxY) => {
+  let grid = [];
+  const xDistance = maxX - minX;
+  const yDistance = maxY = minY;
+
+  for (let x = 0; x < xDistance; x++) {
+    grid[x] = [];
+
+    for (let y = 0; y < yDistance; y++) {
+      grid[x][y] = [x, y];
+    }
+  }
+
+  return grid;
+}
+
 const byCoordinateAsc = (a, b) => {
   // (a.x - b.x) + (a.y - b.y);
   const aDistanceToOrigin = Math.sqrt(Math.pow(a.x, 2) + Math.pow(a.y, 2));
@@ -24,110 +40,182 @@ const calculateArea = (coordinate, sourceCoordinate) =>
   Math.abs(coordinate.x - sourceCoordinate.x) * Math.abs(coordinate.y - sourceCoordinate.y);
 
 module.exports = (input) => {
-  let grid = [],
-    maxX,
-    maxY,
-    minX,
-    minY;
+  const coordinates = input.split('\r\n')
+    .filter((i) => i)
+    .map(parseCoordinate);
 
-  return input.split('\r\n')
-    .map(parseCoordinate)
-    .map((coordinate) => {
-      if (coordinate.x > maxX || !maxX) {
-        maxX = coordinate.x;
-      }
+  const maxX = Math.max(...coordinates.map((coordinate) => coordinate.x)),
+    minX = Math.min(...coordinates.map((coordinate) => coordinate.x)),
+    maxY = Math.max(...coordinates.map((coordinate) => coordinate.y)),
+    minY = Math.min(...coordinates.map((coordinate) => coordinate.y));
 
-      if (coordinate.x < minX || !minX) {
-        minX = coordinate.x;
-      }
+  const finiteCoordinates = coordinates.map((coordinate) => {
+    coordinate.isNotInfinite = !(coordinate.x === maxX
+      || coordinate.x === minX
+      || coordinate.y === maxY
+      || coordinate.y === minY);
 
-      if (coordinate.y > maxY || !maxY) {
-        maxY = coordinate.y;
-      }
+    return coordinate;
+  }).filter((coordinate) => coordinate.isNotInfinite);
 
-      if (coordinate.y < minY || !minY) {
-        minY = coordinate.y;
-      }
+  let grid = initializeGrid(minX, maxX, minY, maxY);
 
-      return coordinate;
-    })
-    .map((coordinate) => {
-      coordinate.isValid = !(coordinate.x === maxX
-        || coordinate.x === minX
-        || coordinate.y === maxY
-        || coordinate.y === minY);
+  return grid.map((row) => {
+    return row.map((coordinate) => {
+      const x = coordinate[0],
+        y = coordinate[1];
 
-      return coordinate;
-    })
-    .filter((coordinate) => coordinate.isValid)
-    .map((coordinate) => {
-      if (grid.length === 0) {
-        for (let x = 0; x < maxX; x++) {
-          grid[x] = [];
-          for (let y = 0; y < maxY; y++) {
-            grid[x][y] = '#';
-          }
-        }
-      }
+      // should see {distance: 7 id: 3} after reduce for the first element
+      const manhattanDistances = finiteCoordinates.map((finiteCoordinate) => {
+        const manhattanDistance = calculateManhattanDistance({x: x, y: y}, finiteCoordinate);
 
-      return coordinate;
-    })
-    // calculate distances to all other coords and find the one with the shortest distance
-    .map((coordinate, index, source) => {
-      source.forEach((sourceCoordinate) => {
-        const manhattanDistance = calculateManhattanDistance(coordinate, sourceCoordinate);
-        // 
-        if (!coordinate.closestManhattanDistance || manhattanDistance < coordinate.closestManhattanDistance) {
-          coordinate.closestManhattanDistance = manhattanDistance;
-          const xDelta = Math.abs(coordinate.x - sourceCoordinate.x);
-          const yDelta = Math.abs(coordinate.y - sourceCoordinate.y);
-          coordinate.xStart = coordinate.x - xDelta;
-          coordinate.xEnd = coordinate.x + xDelta;
-          coordinate.yStart = coordinate.y - yDelta;
-          coordinate.yEnd = coordinate.y + yDelta;
-          // coordinate.closestManhattanDistance = manhattanDistance;
-          // coordinate.xStart = coordinate.x - Math.abs(coordinate.x - sourceCoordinate.x) < 0 ? 0 : coordinate.x - Math.abs(coordinate.x - sourceCoordinate.x);
-          // coordinate.xEnd = coordinate.x + Math.abs(coordinate.x - sourceCoordinate.x) < 0 ? 0 : coordinate.x + Math.abs(coordinate.x - sourceCoordinate.x);
-          // coordinate.yStart = coordinate.y - Math.abs(coordinate.y - sourceCoordinate.y) < 0 ? 0 : coordinate.y - Math.abs(coordinate.y - sourceCoordinate.y);
-          // coordinate.yEnd = coordinate.y + Math.abs(coordinate.y - sourceCoordinate.y) < 0 ? 0 : coordinate.y + Math.abs(coordinate.y - sourceCoordinate.y);
-        }
+        return {
+          distance: manhattanDistance,
+          id: finiteCoordinate.id
+        };
       });
 
-      return coordinate;
+      const min = Math.min(...manhattanDistances.map((md) => md.distance));
+      //   .reduce((closest, manhattanDistance) => {
+      //   if (closest.length === 0) {
+      //     closest.push(manhattanDistance);
+      //   } else if (manhattanDistance.distance < closest[0].distance) {
+      //     closest = [manhattanDistance];
+      //   }
+
+      //   return closest;
+      // }, [])
+      //   .map((closest) => closest.id);
+      // .reduce((closest) => {
+      //   if (closest.length > 1) {
+      //     return '.';
+      //   }
+
+      //   return closest;
+      // }, '');
+      // .reduce((closest, current) => {
+      //   if (closest.length > 0 && closest[0] > current.distance) {
+      //     closest = [current];
+      //     return closest;
+      //   }
+      //   if (closest.includes(current)) {
+      //     closest.push(current);
+      //   }
+
+      //   return closest;
+      // }, []);
+
+      return manhattanDistances.filter((md) => md.distance === min);
     })
-    .reduce((accumulator, current) => {
-      for (let x = current.xStart; x <= current.xEnd; x++) {
-        for (let y = current.yStart; y <= current.yEnd; y++) {
-          accumulator[x][y] = accumulator[x][y] === '#' ? current.id : '.';
-        }
-      }
+    // .reduce((accumulator, closest) => {
+    //   if (closest.length === 1) {
+    //     accumulator = closest[0];
+    //   } else if (closest.length > 1) {
+    //     accumulator = '.';
+    //   }
 
-      return accumulator;
-    }, grid)
-    .reduce((accumulator, row) => {
-      const rowCounts = row.reduce((acc, curr) => {
-        if (!['#', '.'].includes(curr)) {
-          if (acc[curr]) {
-            acc[curr]++;
-          } else {
-            acc[curr] = 1;
-          }
-        }
+    //   return accumulator;
+    // }, '#');
+  });
 
-        return acc;
-      }, {});
+  // return input.split('\r\n')
+  //   .map(parseCoordinate)
+  //   .map((coordinate) => {
+  //     if (coordinate.x > maxX || !maxX) {
+  //       maxX = coordinate.x;
+  //     }
 
-      Object.keys(rowCounts)
-        .forEach((key) => {
-          if (accumulator[key]) {
-            accumulator[key] += rowCounts[key];
-          } else {
-            accumulator[key] = rowCounts[key];
-          }
-        });
+  //     if (coordinate.x < minX || !minX) {
+  //       minX = coordinate.x;
+  //     }
 
-      return accumulator;
-    }, {});
+  //     if (coordinate.y > maxY || !maxY) {
+  //       maxY = coordinate.y;
+  //     }
+
+  //     if (coordinate.y < minY || !minY) {
+  //       minY = coordinate.y;
+  //     }
+
+  //     return coordinate;
+  //   })
+  //   .map((coordinate) => {
+  //     coordinate.isValid = !(coordinate.x === maxX
+  //       || coordinate.x === minX
+  //       || coordinate.y === maxY
+  //       || coordinate.y === minY);
+
+  //     return coordinate;
+  //   })
+  //   .filter((coordinate) => coordinate.isValid)
+  //   .map((coordinate) => {
+  //     if (grid.length === 0) {
+  //       for (let x = 0; x < maxX; x++) {
+  //         grid[x] = [];
+  //         for (let y = 0; y < maxY; y++) {
+  //           grid[x][y] = '#';
+  //         }
+  //       }
+  //     }
+
+  //     return coordinate;
+  //   })
+  //   // calculate distances to all other coords and find the one with the shortest distance
+  //   .map((coordinate, index, source) => {
+  //     source.forEach((sourceCoordinate) => {
+  //       const manhattanDistance = calculateManhattanDistance(coordinate, sourceCoordinate);
+  //       // 
+  //       if (!coordinate.closestManhattanDistance || manhattanDistance < coordinate.closestManhattanDistance) {
+  //         coordinate.closestManhattanDistance = manhattanDistance;
+  //         const xDelta = Math.abs(coordinate.x - sourceCoordinate.x);
+  //         const yDelta = Math.abs(coordinate.y - sourceCoordinate.y);
+  //         coordinate.xStart = coordinate.x - xDelta;
+  //         coordinate.xEnd = coordinate.x + xDelta;
+  //         coordinate.yStart = coordinate.y - yDelta;
+  //         coordinate.yEnd = coordinate.y + yDelta;
+  //         // coordinate.closestManhattanDistance = manhattanDistance;
+  //         // coordinate.xStart = coordinate.x - Math.abs(coordinate.x - sourceCoordinate.x) < 0 ? 0 : coordinate.x - Math.abs(coordinate.x - sourceCoordinate.x);
+  //         // coordinate.xEnd = coordinate.x + Math.abs(coordinate.x - sourceCoordinate.x) < 0 ? 0 : coordinate.x + Math.abs(coordinate.x - sourceCoordinate.x);
+  //         // coordinate.yStart = coordinate.y - Math.abs(coordinate.y - sourceCoordinate.y) < 0 ? 0 : coordinate.y - Math.abs(coordinate.y - sourceCoordinate.y);
+  //         // coordinate.yEnd = coordinate.y + Math.abs(coordinate.y - sourceCoordinate.y) < 0 ? 0 : coordinate.y + Math.abs(coordinate.y - sourceCoordinate.y);
+  //       }
+  //     });
+
+  //     return coordinate;
+  //   })
+  //   .reduce((accumulator, current) => {
+  //     for (let x = current.xStart; x <= current.xEnd; x++) {
+  //       for (let y = current.yStart; y <= current.yEnd; y++) {
+  //         accumulator[x][y] = accumulator[x][y] === '#' ? current.id : '.';
+  //       }
+  //     }
+
+  //     return accumulator;
+  //   }, grid)
+  //   .reduce((accumulator, row) => {
+  //     const rowCounts = row.reduce((acc, curr) => {
+  //       if (!['#', '.'].includes(curr)) {
+  //         if (acc[curr]) {
+  //           acc[curr]++;
+  //         } else {
+  //           acc[curr] = 1;
+  //         }
+  //       }
+
+  //       return acc;
+  //     }, {});
+
+  //     Object.keys(rowCounts)
+  //       .forEach((key) => {
+  //         if (accumulator[key]) {
+  //           accumulator[key] += rowCounts[key];
+  //         } else {
+  //           accumulator[key] = rowCounts[key];
+  //         }
+  //       });
+
+  //     return accumulator;
+  //   }, {});
 
 
 
