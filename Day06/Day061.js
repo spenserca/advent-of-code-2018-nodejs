@@ -1,4 +1,4 @@
-const parseCoordinates = (coordinateString, index) => {
+const parseCoordinates = (coordinateString) => {
   const coordinateValues = coordinateString.match(/([0-9]{1,})/g);
 
   return {
@@ -9,7 +9,7 @@ const parseCoordinates = (coordinateString, index) => {
 };
 
 const calculateDistances = (x, y, coordinates) =>
-  coordinates.map((coordinate, index) => {
+  coordinates.map((coordinate) => {
     return {
       distance: Math.abs(x - coordinate.x) + Math.abs(y - coordinate.y),
       id: coordinate.id
