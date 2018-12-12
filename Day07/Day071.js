@@ -12,15 +12,19 @@ module.exports = (input) => {
     .filter((i) => i)
     .map(parseInstructions)
     .reduce((accumulator, current) => {
-      if (accumulator[current.id]) {
-        accumulator[current.id].dependents.push(current.dependent);
+      if (accumulator.has(current.id)) {
+        console.log(`accumulator.has(${current.id})`);
+        const dependents = accumulator.get(current.id);
+        
+
+        dependents.push(current.dependent);
+
+        accumulator.set(current.id, dependents);
       } else {
-        console.log(`else: ${current.id} ${JSON.stringify(current)}`);
-        accumulator[current.id] = {
-          dependents: [current.dependent]
-        };
+        console.log(`!accumulator.has(${current.id})`);
+        accumulator.set(current.id, [current.dependent]);
       }
 
       return accumulator;
-    }, {});
+    }, new Map([]));
 };
