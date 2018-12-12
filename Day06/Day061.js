@@ -1,4 +1,4 @@
-const parseCoorinates = (coordinateString, index) => {
+const parseCoordinates = (coordinateString, index) => {
   const coordinateValues = coordinateString.match(/([0-9]{1,})/g);
 
   return {
@@ -8,112 +8,54 @@ const parseCoorinates = (coordinateString, index) => {
   };
 };
 
-const initializeGrid = (maxX, maxY) => {
-  let grid = {};
-
-  for (let x = 0; x <= maxX; x++) {
-    grid[x] = [];
-
-    for (let y = 0; y <= maxY; y++) {
-      grid[x][y] = '.';
-    }
-  }
-
-  return grid;
-};
-
-const populateCoordinates = (coordinates, grid) => {
-  coordinates.forEach((coordinate) => {
-    grid[coordinate.x][coordinate.y] = coordinate.id;
+const calculateDistances = (x, y, coordinates) =>
+  coordinates.map((coordinate, index) => {
+    return {
+      distance: Math.abs(x - coordinate.x) + Math.abs(y - coordinate.y),
+      id: index
+    };
   });
-};
-
-const getManhattanDistance = (currentCoordinate, finiteCoordinate) =>
-  Math.abs(currentCoordinate.x - finiteCoordinate.x) + Math.abs(currentCoordinate.y - finiteCoordinate.y);
 
 module.exports = (input) => {
   const coordinates = input.split('\r\n')
     .filter((i) => i)
-    .map(parseCoorinates);
+    .map(parseCoordinates);
 
   const maxX = Math.max(...coordinates.map((coordinate) => coordinate.x));
   const minX = Math.min(...coordinates.map((coordinate) => coordinate.x));
   const maxY = Math.max(...coordinates.map((coordinate) => coordinate.y));
   const minY = Math.min(...coordinates.map((coordinate) => coordinate.y));
 
-  const grid = initializeGrid(maxX, maxY);
+  // const filteredCoordinates = coordinates
+  //   .filter((coordinate) => !((coordinate.x === maxX && coordinate.y === maxY)
+  //     || (coordinate.x === minX && coordinate.y == maxY)
+  //     || (coordinate.x === maxX && coordinate.y === minY)
+  //     || (coordinate.x === minX && coordinate.y === minY)));
 
-  populateCoordinates(coordinates, grid);
+  let counts = {};
 
-  const finiteCoordinates = coordinates.filter((coordinate) => coordinate.x !== maxX || coordinate.x !== minX || coordinate.y !== maxY || coordinate.y !== minY);
+  for (let x = minX - 2; x < maxX + 2; x++) {
+    for (let y = minY - 2; y < maxY + 2; y++) {
+      if (x < minX || x > maxX || y < minY || y > maxY) continue;
 
-  Object.keys(grid).forEach((key) => {
-    let row = grid[key];
+      const distances = calculateDistances(x, y, coordinates);
+      const closestDistance = Math.min(...distances.map((distance) => distance.distance));
+      const closestIds = distances.filter((distance) => distance.distance === closestDistance)
+        .map((closest) => closest.id);
 
-    const updatedRow = row.map((value, index) => {
-      const currentCoordinate = {
-        x: parseInt(key),
-        y: index
-      };
-      let closestDistance = Number.MAX_SAFE_INTEGER;
-      let closestCoordinates = [];
-
-      finiteCoordinates.forEach((finiteCoordinate) => {
-        const manhattanDistance = getManhattanDistance(currentCoordinate, finiteCoordinate);
-
-        if (manhattanDistance < closestDistance) {
-          closestDistance = manhattanDistance;
-          closestCoordinates = [finiteCoordinate];
-        } else if (manhattanDistance === closestDistance) {
-          closestCoordinates.push(finiteCoordinate);
-        }
-      });
-
-      if (closestCoordinates.length === 0) {
-        return value;
-      }
-
-      if (closestCoordinates.length === 1) {
-        return closestCoordinates[0].id;
-      }
-
-      return '#';
-    });
-
-    grid[key] = updatedRow;
-  });
-
-  const values = Object.keys(grid)
-    .reduce((accumulator, key) => {
-      const row = grid[key];
-
-      const rowValues = row.reduce((accumulator, value) => {
-        if (value === '#') {
-          return accumulator;
-        }
-
-        if (accumulator[value]) {
-          accumulator[value]++;
+      if (closestIds.length === 1) {
+        if (counts[closestIds[0]]) {
+          counts[closestIds[0]]++;
         } else {
-          accumulator[value] = 1;
+          counts[closestIds[0]] = 1;
         }
+      }
+    }
+  }
 
-        return accumulator;
-      }, {});
-
-      Object.keys(rowValues)
-        .forEach((key) => {
-          if (accumulator[key]) {
-            accumulator[key] += rowValues[key];
-          } else {
-            accumulator[key] = rowValues[key];
-          }
-        });
-
-      return accumulator;
-    }, {})
-
-  return Math.max(...Object.values(values));
+  return Math.max(...Object.values(counts));
+  // return JSON.stringify(counts);
 };
 
 // That's not the right answer; your answer is too high. If you're stuck, there are some general tips on the about page, or you can ask for hints on the subreddit. Please wait one minute before trying again. (You guessed 12568.) 
+// too high: 5041
