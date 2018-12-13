@@ -7,6 +7,19 @@ const parseInstructions = (instruction) => {
   };
 };
 
+const populateDependents = (instructions, instruction) => {
+  if (instructions[instruction.id]) {
+    instructions[instruction.id].dependents.push(instruction.dependent);
+  } else {
+    instructions[instruction.id] = {
+      dependents: [instruction.dependent]
+    };
+  }
+
+  return instructions;
+};
+
+
 const getStartingSteps = (tree, distinctDependents) => {
   let treeTops = [];
 
@@ -45,17 +58,7 @@ module.exports = (input) => {
   const tree = input.split('\n')
     .filter((i) => i)
     .map(parseInstructions)
-    .reduce((accumulator, current) => {
-      if (accumulator[current.id]) {
-        accumulator[current.id].dependents.push(current.dependent);
-      } else {
-        accumulator[current.id] = {
-          dependents: [current.dependent]
-        };
-      }
-
-      return accumulator;
-    }, {});
+    .reduce(populateDependents, {});
 
   console.log(`tree: ${JSON.stringify(tree)}`);
 
@@ -73,6 +76,8 @@ module.exports = (input) => {
 
   // get the first starting points alphabetically
   const startingSteps = getStartingSteps(tree, distinctDependents);
+  console.log(`startingSteps: ${JSON.stringify(startingSteps)}`);
+
   const onlyDependents = getOnlyDependents(tree, distinctDependents);
   console.log(`onlyDependents: ${JSON.stringify(onlyDependents)}`);
 
