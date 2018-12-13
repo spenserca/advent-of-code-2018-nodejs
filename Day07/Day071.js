@@ -82,6 +82,7 @@ module.exports = (input) => {
   let instructionOrder = [];
 
   let count = 0;
+  // this needs to change to while < total count of unique parents + dependents
   while (availableSteps.length < Object.keys(tree).length) {
     // sort current availableSteps and take the first one
     instructionOrder.push(availableSteps.sort()[0]);
@@ -109,7 +110,7 @@ module.exports = (input) => {
     // console.log(`availableSteps before re-looping: ${JSON.stringify(availableSteps)}`);
   }
 
-  return instructionOrder.join(''); // should be B
+  return instructionOrder.join('');
 };
 
 // distinct:
