@@ -32,15 +32,15 @@ module.exports = (input) => {
     for (let y = minY; y < maxY; y++) {
       const distances = calculateDistances(x, y, coordinates);
       const closestDistance = Math.min(...distances.map((distance) => distance.distance));
-      const closestIds = distances.filter((distance) => distance.distance === closestDistance)
+      const closestPoints = distances.filter((distance) => distance.distance === closestDistance)
         .map((closest) => closest.id);
 
-      if (closestIds.length === 1) {
-        if (areas[closestIds[0]]) {
-          areas[closestIds[0]]++;
+      if (closestPoints.length === 1) {
+        if (areas[closestPoints[0]]) {
+          areas[closestPoints[0]]++;
         }
         else {
-          areas[closestIds[0]] = 1;
+          areas[closestPoints[0]] = 1;
         }
       }
     }
