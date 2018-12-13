@@ -88,23 +88,19 @@ module.exports = (input) => {
 
   // get the first starting points alphabetically
   const independentSteps = getIndependentSteps(tree, distinctDependents);
-  console.log(`independentSteps: ${JSON.stringify(independentSteps)}`);
 
   const dependentOnlySteps = getDependentOnlySteps(tree, distinctDependents);
-  console.log(`dependentOnlySteps: ${JSON.stringify(dependentOnlySteps)}`);
 
   let availableSteps = independentSteps;
 
   // add the first step to the instructionOrder
   let instructionOrder = [];
-
   let count = 0;
-  // console.log(Object.keys(tree).length); // 5
-
-  // this needs to change to while < total count of unique parents + dependents
   while (instructionOrder.length < distinct.size) {
-    // sort current availableSteps and take the first one
-    instructionOrder.push(availableSteps.sort()[0]);
+    count++;
+    const availableStepsCopy = availableSteps;
+
+    instructionOrder.push(availableStepsCopy.sort()[0]);
     // 1. Adds C to instructionOrder
     // 2. Adds A to instructionOrder
     // 3. Adds B to instructionOrder
@@ -119,32 +115,27 @@ module.exports = (input) => {
         // 4. D, E, E, E, E, F get E, nothing, nothing, nothing, nothing, nothing, E
 
         if (dependentSteps) {
-          // remove steps that have already ran
-          // const unfulfilledDependentSteps = dependentSteps.filter((step) => !instructionOrder.includes(step));
-
           // remove steps that are already present in availableSteps
           // const alreadyTrackedSteps = unfulfilledDependentSteps.filter((step) => !availableSteps.includes(step));
+          const distinctDependentSteps = new Set(dependentSteps);
 
-          accumulator = accumulator.concat(dependentSteps);
+          accumulator = accumulator.concat(...distinctDependentSteps);
+          console.log(`${count}. accumulator after dependentSteps: ${JSON.stringify(accumulator)}`);
         }
 
         return accumulator;
       }, []);
 
     availableSteps.shift();
+    console.log(`${count}. availableSteps after shift(): ${JSON.stringify(availableSteps)}`);
     // 1. C gets removed. A, F remain
     // 2. A gets removed. F, B, D, E remain
     // 3. B gets removed. D, E, E, E, E, F remain
     // 4. D gets removed. E, E, E, E, E, E, F remain
 
     availableSteps = availableSteps.concat(nextAvailableSteps);
+    console.log(`${count}. availableSteps after .concat(nextAvailableSteps): ${JSON.stringify(availableSteps)}`);
   }
 
   return instructionOrder.join('');
 };
-
-// distinct:
-// Day071: ["A", "C", "D", "E", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"].
-
-// tree:
-// Day071: ["A", "B", "C", "D", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"].
