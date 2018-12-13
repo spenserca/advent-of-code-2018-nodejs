@@ -7,24 +7,75 @@ const parseInstructions = (instruction) => {
   };
 };
 
+const getTreeTop = (tree, distinctDependents) => {
+  let treeTops = [];
+
+  Object.keys(tree)
+    .forEach((key) => {
+      if (!distinctDependents.includes(key)) {
+        treeTops.push(key);
+      }
+    });
+
+  return treeTops;
+}
+
 module.exports = (input) => {
-  return input.split('\n')
+  const tree = input.split('\n')
     .filter((i) => i)
     .map(parseInstructions)
     .reduce((accumulator, current) => {
-      if (accumulator.has(current.id)) {
-        console.log(`accumulator.has(${current.id})`);
-        const dependents = accumulator.get(current.id);
-        
-
-        dependents.push(current.dependent);
-
-        accumulator.set(current.id, dependents);
+      if (accumulator[current.id]) {
+        accumulator[current.id].dependents.push(current.dependent);
       } else {
-        console.log(`!accumulator.has(${current.id})`);
-        accumulator.set(current.id, [current.dependent]);
+        accumulator[current.id] = {
+          dependents: [current.dependent]
+        };
       }
 
       return accumulator;
-    }, new Map([]));
+    }, {});
+
+  const distinctDependents = Object.values(tree)
+    .reduce((accumulator, current) => {
+      return accumulator.concat(current.dependents);
+    }, [])
+    .reduce((accumulator, current) => {
+      if (!accumulator.includes(current)) {
+        accumulator.push(current);
+      }
+
+      return accumulator;
+    }, []);
+
+  // get the first starting points alphabetically
+  const startingSteps = getTreeTop(tree, distinctDependents);
+
+  let availableSteps = startingSteps;
+
+  // add the first step to the instructionOrder
+  let instructionOrder = '';
+
+  while (availableSteps.length > 0) {
+    let count = 0;
+    instructionOrder += availableSteps.sort()[0];
+    // determine which steps are now valid and push them to availableSteps
+    // then concatenate the order string with the first value in sorted availableSteps
+    const nextAvailableSteps = availableSteps
+      .reduce((accumulator, current) => {
+        const dependents = tree[current].dependents;
+
+        return accumulator.concat(dependents);
+      }, []);
+
+    availableSteps = availableSteps.concat(nextAvailableSteps).shift();
+  }
+
+  return instructionOrder; // should be B
 };
+
+// distinct:
+// Day071: ["A", "C", "D", "E", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"].
+
+// tree:
+// Day071: ["A", "B", "C", "D", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"].
