@@ -18,7 +18,20 @@ const getStartingSteps = (tree, distinctDependents) => {
     });
 
   return treeTops;
-}
+};
+
+const getOnlyDependents = (tree, distinctDependents) => {
+  // get the values that exist in distinctDependents
+  // but don't exists in Object.keys(tree)
+  return distinctDependents
+    .reduce((accumulator, current) => {
+      if (!Object.keys(tree).includes(current)) {
+        return accumulator.concat(current);
+      }
+
+      return accumulator;
+    }, []);
+};
 
 const getDependentSteps = (tree, parent) => {
   const parentStep = tree[parent];
@@ -60,6 +73,8 @@ module.exports = (input) => {
 
   // get the first starting points alphabetically
   const startingSteps = getStartingSteps(tree, distinctDependents);
+  const onlyDependents = getOnlyDependents(tree, distinctDependents);
+  console.log(`onlyDependents: ${JSON.stringify(onlyDependents)}`);
 
   let availableSteps = startingSteps;
 
