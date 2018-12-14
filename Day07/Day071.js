@@ -11,21 +11,9 @@ const parseInstructions = (accumulator, instruction) => {
   const currentDependentInstructions = accumulator[1];
   const parentDependentRelationships = accumulator[2];
 
-  const existingRelationship = parentDependentRelationships
-    .find((pdr) => pdr.endsWith(dependentInstruction));
-
   currentParentInstructions.push(parentInstruction);
   currentDependentInstructions.push(dependentInstruction);
-
-  if (existingRelationship) {
-    const updateParentDependentRelationship = `${existingRelationship}-${parentInstruction}${dependentInstruction}`;
-
-    parentDependentRelationships.push(updateParentDependentRelationship);
-  } else {
-    parentDependentRelationships.push(`${parentInstruction}${dependentInstruction}`);
-  }
-  // before: ["CA","CF","AB","AD","BE","DE","FE"]
-  // after:  ["CA","CF","AB","AD","BE","BE-DE","BE-FE"]
+  parentDependentRelationships.push(`${parentInstruction}${dependentInstruction}`);
 
   return [currentParentInstructions, currentDependentInstructions, parentDependentRelationships];
 };
