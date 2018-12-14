@@ -117,13 +117,56 @@ module.exports = (input) => {
   let orderOfInstructions = startingPoints.shift();
 
   let availableSteps = relationships
-    .filter((instruction) => instruction.startsWith(...orderOfInstructions)); // ["CA", "CF"]
+    .filter((relationship) => relationship.startsWith(...orderOfInstructions)); // ["CA", "CF"]
 
   while (orderOfInstructions.length < distinctInstructions.size) {
     const nextInstruction = availableSteps
       .map((instruction) => instruction.split(''))
-      .reduce((accumulator, stepRelationship) => {
-        accumulator.push(stepRelationship[1]);
+      .reduce((accumulator, instructionDependent) => {
+        if (instructionDependent.includes('-')) {
+          // parse all parent values
+          const parents = instructionDependent.join('')
+            .split('-')
+            .map((relationship) => {
+              return relationship.split('')[0];
+            });
+
+          console.log(`parents: ${JSON.stringify(parents)}`);
+          console.log(`orderOfInstructions: ${JSON.stringify(orderOfInstructions)}`);
+          // check if all parents are included in orderOfInstructions
+          const parentDependenciesSatisfied = parents
+            .map((parent) => {
+              return orderOfInstructions.includes(parent);
+            })
+            .reduce((accumulator, current) => {
+              if (accumulator === undefined) {
+                return current;
+              } else if (accumulator === false || current === false) {
+                return false;
+              }
+
+              return true;
+            }, undefined);
+          // .reduce((areAllSatisfied, isParentSatisfied) => {
+          //   if (areAllSatisfied === undefined) {
+          //     areAllSatisfied = isParentSatisfied; // could be true or false
+          //   } else if (areAllSatisfied === false) { // at least one value has been false so far
+          //     areAllSatisfied = false;
+          //   } else {
+          //     areAllSatisfied = true;
+          //   }
+
+          //   return areAllSatisfied;
+          // }, undefined);
+
+          console.log(`parentDependenciesSatisfied: ${JSON.stringify(parentDependenciesSatisfied)}`);
+
+          if (parentDependenciesSatisfied === true) {
+            accumulator.push(instructionDependent[1]);
+          }
+        } else {
+          accumulator.push(instructionDependent[1]);
+        }
 
         return accumulator;
       }, [])
@@ -143,7 +186,7 @@ module.exports = (input) => {
     availableSteps = availableSteps.concat(nextSteps);
   }
 
-  return JSON.stringify(orderOfInstructions);
+  return orderOfInstructions;
 
   // const instructions = input.split('\n')
   //   .filter((i) => i)
