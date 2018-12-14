@@ -78,6 +78,8 @@ module.exports = (input) => {
     .map(removeDuplicates);
   console.log(JSON.stringify(instructions));
 
+  // TODO: build relationships where dependency relies on multiple parents
+
   const distinctInstructions = new Set([...instructions[0], ...instructions[1]]);
   console.log(distinctInstructions.size);
 
