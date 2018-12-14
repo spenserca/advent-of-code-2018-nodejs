@@ -101,18 +101,22 @@ module.exports = (input) => {
     .map(removeDuplicates);
   console.log(JSON.stringify(instructions));
 
+  const parents = instructions[0];
+  const dependents = instructions[1];
+  const relationships = instructions[2];
+
   // TODO: build relationships where dependency relies on multiple parents
 
-  const distinctInstructions = new Set([...instructions[0], ...instructions[1]]);
+  const distinctInstructions = new Set([...parents, ...dependents]);
   console.log(distinctInstructions.size);
 
-  const startingPoints = instructions[0]
-    .filter((key) => !instructions[1].includes(key))
+  const startingPoints = parents
+    .filter((key) => !dependents.includes(key))
     .sort();
 
   let orderOfInstructions = startingPoints.shift();
 
-  let availableSteps = instructions[2]
+  let availableSteps = relationships
     .filter((instruction) => instruction.startsWith(...orderOfInstructions)); // ["CA", "CF"]
 
   while (orderOfInstructions.length < distinctInstructions.size) {
@@ -133,7 +137,7 @@ module.exports = (input) => {
     availableSteps = availableSteps.filter((step) => !step.endsWith(nextInstruction));
 
     // unlock next available steps
-    const nextSteps = instructions[2]
+    const nextSteps = relationships
       .filter((instruction) => instruction.startsWith(nextInstruction));
 
     availableSteps = availableSteps.concat(nextSteps);
