@@ -75,6 +75,29 @@ module.exports = (input) => {
   const instructions = input.split('\n')
     .filter((i) => i)
     .reduce(parseInstructions, [])
+    .reduce((accumulator, current, index) => {
+      if (index === 2) {
+        // combine values of current that have the same end value
+        const newRelationships = current.reduce((accumulator, current, index, source) => {
+          const currentEnding = current.split('')[1];
+          const matchingEndings = source.filter((value) => value.endsWith(currentEnding));
+
+          if (matchingEndings.length > 0) {
+            accumulator.push(matchingEndings.join('-'));
+          } else {
+            accumulator.push(current);
+          }
+
+          return accumulator;
+        }, []);
+
+        accumulator.push(newRelationships);
+      } else {
+        accumulator.push(current);
+      }
+
+      return accumulator;
+    }, [])
     .map(removeDuplicates);
   console.log(JSON.stringify(instructions));
 
