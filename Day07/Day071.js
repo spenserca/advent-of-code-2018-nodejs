@@ -24,6 +24,9 @@ const removeDuplicates = (arrayToDistinct) => {
   return new Array(...distinct);
 };
 
+const parentHasHappened = (orderOfInstructions, parent) =>
+  orderOfInstructions.includes(parent);
+
 module.exports = (input) => {
   const instructions = input.split('\n')
     .filter((i) => i)
@@ -83,9 +86,7 @@ module.exports = (input) => {
 
           // check if all parents are included in orderOfInstructions
           const parentDependenciesSatisfied = parents
-            .map((parent) => {
-              return orderOfInstructions.includes(parent);
-            })
+            .map((parent) => parentHasHappened(orderOfInstructions, parent))
             .reduce((accumulator, current) => {
               if (accumulator === undefined) {
                 return current;
