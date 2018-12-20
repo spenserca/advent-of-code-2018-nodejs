@@ -39,9 +39,11 @@ module.exports = (serialNumber) => {
     for (let y = 0; y <= 297; y++) {
       // calculate 3x3 power & store with top left most coords
       const powerGrid = [];
+      const maxX = x + 2;
+      const maxY = y + 2;
 
-      for (i = x; i < x + 3; i++) {
-        for (j = y; j < y + 3; j++) {
+      for (i = x; i <= maxX; i++) {
+        for (j = y; j < maxY; j++) {
           powerGrid.push(grid[i][j]);
         }
       }
@@ -50,5 +52,14 @@ module.exports = (serialNumber) => {
     }
   }
 
-  return JSON.stringify(grid[0][0]);
+  const maxPowerTopLeftCoordinate = Object.keys(squares)
+    .reduce((maxPowerCoordinate, currentCoordinate) => {
+      if (squares[currentCoordinate] > (maxPowerCoordinate[1] || Number.MIN_SAFE_INTEGER)) {
+        maxPowerCoordinate = [currentCoordinate, squares[currentCoordinate]];
+      }
+
+      return maxPowerCoordinate;
+    }, []);
+
+  return maxPowerTopLeftCoordinate[0];
 }
