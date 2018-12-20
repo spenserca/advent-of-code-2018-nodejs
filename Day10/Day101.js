@@ -12,7 +12,7 @@ const getHundredsDigit = (powerLevel) => {
 const getPowerLevel = (x, y, serialNumber) => {
   const nonIndexedX = x + 1;
   const nonIndexedY = y + 1;
-  const powerLevel = ((nonIndexedX + 10) * nonIndexedY + serialNumber) * rackId;
+  const powerLevel = ((nonIndexedX + 10) * nonIndexedY + serialNumber) * (nonIndexedX + 10);
   const hundredsDigit = getHundredsDigit(powerLevel);
 
   return hundredsDigit - 5;
@@ -33,6 +33,22 @@ const initializeGrid = (serialNumber) => {
 
 module.exports = (serialNumber) => {
   const grid = initializeGrid(serialNumber);
+  let squares = {};
 
-  return JSON.stringify(grid);
+  for (let x = 0; x <= 297; x++) {
+    for (let y = 0; y <= 297; y++) {
+      // calculate 3x3 power & store with top left most coords
+      const powerGrid = [];
+
+      for (i = x; i < x + 3; i++) {
+        for (j = y; j < y + 3; j++) {
+          powerGrid.push(grid[i][j]);
+        }
+      }
+
+      squares[`${x},${y}`] = powerGrid.reduce((sum, current) => sum += current, 0);
+    }
+  }
+
+  return JSON.stringify(grid[0][0]);
 }
