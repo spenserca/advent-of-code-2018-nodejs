@@ -37,18 +37,17 @@ module.exports = (serialNumber) => {
 
   for (let x = 0; x <= 297; x++) {
     for (let y = 0; y <= 297; y++) {
-      // calculate 3x3 power & store with top left most coords
       const powerGrid = [];
       const maxX = x + 2;
       const maxY = y + 2;
 
       for (i = x; i <= maxX; i++) {
-        for (j = y; j < maxY; j++) {
+        for (j = y; j <= maxY; j++) {
           powerGrid.push(grid[i][j]);
         }
       }
 
-      squares[`${x},${y}`] = powerGrid.reduce((sum, current) => sum += current, 0);
+      squares[`${x + 1},${y + 1}`] = powerGrid.reduce((sum, current) => sum += current, 0);
     }
   }
 
