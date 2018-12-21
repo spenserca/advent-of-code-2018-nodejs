@@ -49,22 +49,15 @@ module.exports = (serialNumber) => {
 
   for (let x = 0; x <= 299; x++) {
     for (let y = 0; y <= 299; y++) {
+      const powerGrid = [];
 
-      const maxPowerAndSize = getMaxPowerAndSize(x, y, grid);
+      for (i = x; i <= 299; i++) {
+        for (j = y; j <= 299; j++) {
+          powerGrid.push(grid[i][j]);
+        }
+      }
 
-      squares[`${x + 1},${y + 1},${maxPowerAndSize.size}`] = maxPowerAndSize.maxPower;
-
-      // const powerGrid = [];
-
-      // for (i = x; i <= 299; i++) {
-      //   for (j = y; j <= 299; j++) {
-      //     console.log(`Inside inner loop for: ${i},${j}`);
-      //     powerGrid.push(grid[i][j]);
-      //   }
-      // }
-
-      // console.log(`After inner loop for: ${x},${y}`);
-      // squares[`${x + 1},${y + 1},${powerGrid.length}`] = powerGrid.reduce((sum, current) => sum += current, 0);
+      squares[`${x + 1},${y + 1},${powerGrid.length}`] = powerGrid.reduce((sum, current) => sum += current, 0);
     }
   }
 
