@@ -31,23 +31,40 @@ const initializeGrid = (serialNumber) => {
   return grid;
 };
 
+const getMaxPowerAndSize = (x, y, grid) => {
+  const abc = grid.reduce((accumulator, row) => {
+
+  }, []);
+
+
+  return {
+    size: 0,
+    maxPower: 0
+  };
+};
+
 module.exports = (serialNumber) => {
   const grid = initializeGrid(serialNumber);
   let squares = {};
 
   for (let x = 0; x <= 299; x++) {
     for (let y = 0; y <= 299; y++) {
-      const powerGrid = [];
 
-      for (i = x; i <= 299; i++) {
-        for (j = y; j <= 299; j++) {
-          console.log(`Inside inner loop for: ${i},${j}`);
-          powerGrid.push(grid[i][j]);
-        }
-      }
+      const maxPowerAndSize = getMaxPowerAndSize(x, y, grid);
 
-      console.log(`After inner loop for: ${x},${y}`);
-      squares[`${x + 1},${y + 1},${powerGrid.length}`] = powerGrid.reduce((sum, current) => sum += current, 0);
+      squares[`${x + 1},${y + 1},${maxPowerAndSize.size}`] = maxPowerAndSize.maxPower;
+
+      // const powerGrid = [];
+
+      // for (i = x; i <= 299; i++) {
+      //   for (j = y; j <= 299; j++) {
+      //     console.log(`Inside inner loop for: ${i},${j}`);
+      //     powerGrid.push(grid[i][j]);
+      //   }
+      // }
+
+      // console.log(`After inner loop for: ${x},${y}`);
+      // squares[`${x + 1},${y + 1},${powerGrid.length}`] = powerGrid.reduce((sum, current) => sum += current, 0);
     }
   }
 
